@@ -20,6 +20,7 @@
     .month{background:var(--blue-soft);color:var(--blue);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:700;display:inline-flex;justify-content:center;width:100%;margin-bottom:18px;}
     .status{border-radius:18px;padding:16px 18px;margin-bottom:14px;border:1px solid var(--border);}
     .status.paid{background:var(--green-soft);border-color:#86efac;}
+    .status.sent{background:var(--blue-soft);border-color:#93c5fd;}
     .status.open{background:var(--amber-soft);border-color:#fdba74;}
     .status .label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
     .status .value{font-size:24px;font-weight:800;margin-top:6px;}
@@ -62,25 +63,27 @@
     };
     const esc = s => String(s||'').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 
-    let state = { monthKey:'', monthLabel:'', amount:7253.58, paidDate:'', status:'open' };
+    let state = { monthKey:'', monthLabel:'', amount:7253.58, sentDate:'', paidDate:'', status:'open' };
 
     function render(content){ document.getElementById('app').innerHTML = content; }
 
     function renderState(){
       const paid = state.status === 'paid';
+      const sent = state.status === 'sent';
       render(`
         <div class="month">${esc(state.monthLabel || monthLabel(state.monthKey))}</div>
-        <div class="status ${paid?'paid':'open'}">
+        <div class="status ${paid?'paid':(sent?'sent':'open')}">
           <div class="label">Status</div>
-          <div class="value">${paid?'Opłacona':'Do oznaczenia'}</div>
+          <div class="value">${paid?'Opłacona':(sent?'Czeka na opłacenie':'Do oznaczenia')}</div>
           <div class="meta">
             Kwota: <strong>${fmtMoney(state.amount)} zł</strong><br>
-            ${paid ? `Data opłacenia: <strong>${esc(state.paidDate)}</strong>` : 'Po kliknięciu zapisze się dzisiejsza data.'}
+            ${state.sentDate ? `Data wysłania do Kajetana: <strong>${esc(state.sentDate)}</strong><br>` : ''}
+            ${paid ? `Data opłacenia: <strong>${esc(state.paidDate)}</strong>` : 'Po kliknięciu zapisze się dzisiejsza data opłacenia.'}
           </div>
         </div>
         <button class="btn primary" onclick="markPaid()">Opłacono dzisiaj</button>
         ${paid?'<button class="btn secondary" onclick="loadStatus()">Odśwież status</button>':''}
-        <div class="hint">Działa dla bieżącego miesiąca. Jeśli dziś klikniesz, status Kajetana w Płatnościach Artura zmieni się automatycznie.</div>
+        <div class="hint">Działa dla bieżącego miesiąca. Ty oznaczasz tylko etap opłacenia. Data wysłania z dashboardu zostaje zachowana osobno.</div>
       `);
     }
 
